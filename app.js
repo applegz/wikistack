@@ -1,34 +1,29 @@
 const express = require('express');
-const morgan = require('morgan');
-const { User } = require('./models');
 const app = express();
-const layout = require('./views/layout');
+const morgan = require('morgan');
+//what is path? ❓
+const path = require('path');
 
-const wikiRouter = require('./routes/wiki');
-const userrouter = require('./routes/users');
-
-app.use('/wiki', wikiRouter);
-
-app.use(express.urlencoded({ extended: false }));
-
-app.use(express.static(__dirname + '/public'));
 app.use(morgan('dev'));
+app.use(express.static(path.join(__dirname, './public')));
+//serving up static files (e.g. css files)
+app.use(express.urlencoded({ extended: false }));
+//----------------missing this part in our original practice
+app.use(express.json()); // ❓ what is json?
+// app.use(require('method-override')('_method')); // ❓  what is this part?
+//----------------
 
-// app.get('/layout', (req, res, next) => {
-//   res.send(layout(''));
-// });
+app.use('/wiki', require('./routes/wiki'));
+app.use('/users', require('./routes/users'));
 
-// app.get('/', (req, res, next) => {
-//   res.send('hello world');
-// });
+app.get('/', function (req, res) {
+  res.redirect('/wiki/');
+});
 
-const init = async () => {
-  await db.sync({ force: true });
-  // await Page.sync();
-  const PORT = 3000;
-  app.listen(PORT, () => {
-    console.log(`App listening in port ${PORT}`);
-  });
-};
+module.exports = app; //why here?
 
-init();
+// this part is not in the solution
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`App listening in port ${PORT}`);
+});
